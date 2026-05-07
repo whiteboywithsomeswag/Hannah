@@ -1,0 +1,24 @@
+name: Update OLED Data
+
+on:
+  repository_dispatch:
+    types: [update-oled]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write JSON
+        run: |
+          echo '${{ toJson(github.event.client_payload) }}' > data.json
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add data.json
+          git commit -m "update" || exit 0
+          git push
