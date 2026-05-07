@@ -42,7 +42,7 @@ const BIN_ID = "69fc130e250b1311c3159709";
 const API_KEY = "$2a$10$9E6n6n0ZbtyrLdwRZdLfGuqvo1yOxOrgmSRUdmwHr87h0eZXK5L12";
 
 async function send() {
-
+  alert(document.getElementById("msg").value);
   const text = document.getElementById("msg").value;
 
   const res = await fetch(`https://api.jsonbin.io/v3/b/${69fc130e250b1311c3159709}`, {
