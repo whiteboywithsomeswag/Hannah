@@ -1,8 +1,11 @@
-name: Update OLED Data!
+name: Update OLED Data
 
 on:
   repository_dispatch:
     types: [update-oled]
+
+permissions:
+  contents: write
 
 jobs:
   build:
