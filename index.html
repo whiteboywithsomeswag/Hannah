@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ESP32 Live Controller</title>
+  <title>ESP32 Live Message</title>
 
   <style>
     body {
@@ -13,77 +13,54 @@
     }
 
     textarea {
-      width: 350px;
-      height: 120px;
+      width: 400px;
+      height: 150px;
       font-size: 16px;
-    }
-
-    input, select {
-      margin: 10px;
     }
 
     button {
       padding: 12px 20px;
       font-size: 16px;
       cursor: pointer;
+      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
 
-<h1>ESP32 LIVE CONTROL</h1>
+<h1>ESP32 Message Control</h1>
 
-<textarea id="msg">Hello ESP32</textarea>
-
+<textarea id="msg">Type up to ~8 sentences here...</textarea>
 <br>
 
-<label>Size</label>
-<input type="range" id="size" min="1" max="4" value="2">
-
-<br>
-
-<label>Speed</label>
-<input type="range" id="speed" min="5" max="50" value="20">
-
-<br>
-
-<label>Direction</label>
-<select id="dir">
-  <option value="left">Left</option>
-  <option value="right">Right</option>
-  <option value="up">Up</option>
-</select>
-
-<br><br>
-
-<button onclick="send()">Send Live Update</button>
+<button onclick="send()">Send to ESP32</button>
 
 <script>
 
+const BIN_ID = "69fc130e250b1311c3159709";
+const API_KEY = "$2a$10$9E6n6n0ZbtyrLdwRZdLfGuqvo1yOxOrgmSRUdmwHr87h0eZXK5L12";
+
 async function send() {
 
-  const data = {
-    message: document.getElementById("msg").value,
-    size: Number(document.getElementById("size").value),
-    speed: Number(document.getElementById("speed").value),
-    dir: document.getElementById("dir").value
-  };
+  const text = document.getElementById("msg").value;
 
-  await fetch("https://api.github.com/repos/whiteboywithsomeswag/Hannah/dispatches", {
-    method: "POST",
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${69fc130e250b1311c3159709}`, {
+    method: "PUT",
     headers: {
-      "Accept": "application/vnd.github+json",
-      "Authorization": "Bearer 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",
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "X-Master-Key": $2a$10$9E6n6n0ZbtyrLdwRZdLfGuqvo1yOxOrgmSRUdmwHr87h0eZXK5L12
     },
     body: JSON.stringify({
-      event_type: "update-oled",
-      client_payload: data
+      message: text
     })
   });
 
-  alert("Sent!");
+  if (res.ok) {
+    alert("Sent to ESP32!");
+  } else {
+    alert("Failed to send");
+  }
 }
 
 </script>
