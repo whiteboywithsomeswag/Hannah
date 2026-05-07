@@ -45,6 +45,7 @@ const API_KEY = "$2a$10$9E6n6n0ZbtyrLdwRZdLfGuqvo1yOxOrgmSRUdmwHr87h0eZXK5L12";
 async function send() {
 
   const text = document.getElementById("msg").value;
+  const size = document.getElementById("fontsize").value;
 
   const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
     method: "PUT",
@@ -53,7 +54,8 @@ async function send() {
       "X-Master-Key": API_KEY
     },
     body: JSON.stringify({
-      message: text
+      message: text,
+      fontsize: size
     })
   });
 
