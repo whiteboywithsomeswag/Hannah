@@ -1,123 +1,90 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ESP32 OLED Dashboard</title>
+  <title>ESP32 Live Controller</title>
 
   <style>
     body {
-      background: #0d0d0d;
+      background: #111;
       color: white;
       font-family: Arial;
       text-align: center;
-      margin: 0;
-    }
-
-    h1 {
-      margin-top: 20px;
-    }
-
-    .panel {
-      margin-top: 20px;
+      margin-top: 40px;
     }
 
     textarea {
-      width: 360px;
+      width: 350px;
       height: 120px;
       font-size: 16px;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
     }
 
-    input {
+    input, select {
       margin: 10px;
     }
 
     button {
       padding: 12px 20px;
       font-size: 16px;
-      border: none;
-      border-radius: 10px;
-      background: #00c3ff;
       cursor: pointer;
-    }
-
-    .preview {
-      margin-top: 30px;
-      font-size: 20px;
-      opacity: 0.8;
     }
   </style>
 </head>
 
 <body>
 
-<h1>ESP32 OLED Dashboard</h1>
+<h1>ESP32 LIVE CONTROL</h1>
 
-<div class="panel">
+<textarea id="msg">Hello ESP32</textarea>
 
-  <textarea id="message">Hello ESP32</textarea>
-  <br>
+<br>
 
-  <label>Color</label>
-  <input type="color" id="color" value="#ffffff">
+<label>Size</label>
+<input type="range" id="size" min="1" max="4" value="2">
 
-  <label>Speed</label>
-  <input type="range" id="speed" min="5" max="50" value="20">
+<br>
 
-  <label>Size</label>
-  <input type="range" id="size" min="1" max="4" value="2">
+<label>Speed</label>
+<input type="range" id="speed" min="5" max="50" value="20">
 
-  <br><br>
+<br>
 
-  <button onclick="save()">Save to ESP</button>
+<label>Direction</label>
+<select id="dir">
+  <option value="left">Left</option>
+  <option value="right">Right</option>
+  <option value="up">Up</option>
+</select>
 
-</div>
+<br><br>
 
-<div class="preview" id="preview"></div>
+<button onclick="send()">Send Live Update</button>
 
 <script>
 
-const API_URL = "https://api.github.com/repos/whiteboywithsomeswag/Hannah/dispatches";
-// (we set this up next)
+async function send() {
 
-function updatePreview() {
-  const data = getData();
-  document.getElementById("preview").innerText = JSON.stringify(data, null, 2);
-}
-
-function getData() {
-  return {
-    message: document.getElementById("message").value,
-    color: document.getElementById("color").value,
+  const data = {
+    message: document.getElementById("msg").value,
+    size: Number(document.getElementById("size").value),
     speed: Number(document.getElementById("speed").value),
-    size: Number(document.getElementById("size").value)
+    dir: document.getElementById("dir").value
   };
-}
 
-async function save() {
-
-  const data = getData();
-
-  await fetch(API_URL, {
+  await fetch("https://api.github.com/repos/whiteboywithsomeswag/Hannah/dispatches", {
     method: "POST",
     headers: {
       "Accept": "application/vnd.github+json",
-      "Authorization": "Bearer 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"
+      "Authorization": "Bearer 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",
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
       event_type: "update-oled",
       client_payload: data
     })
   });
-  alert("Saved!");
+
+  alert("Sent!");
 }
-
-["message","color","speed","size"].forEach(id => {
-  document.getElementById(id).addEventListener("input", updatePreview);
-});
-
-updatePreview();
 
 </script>
 
