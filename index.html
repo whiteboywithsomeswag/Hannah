@@ -1,47 +1,194 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ESP32 OLED Message</title>
+  <title>ESP32 OLED Control Panel</title>
+
   <style>
     body {
+      background: black;
+      color: white;
       font-family: Arial;
       text-align: center;
-      margin-top: 50px;
-      background: #111;
-      color: white;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    .controls {
+      margin-top: 20px;
     }
 
     textarea {
-      width: 300px;
+      width: 350px;
       height: 120px;
       font-size: 18px;
       padding: 10px;
+      border-radius: 10px;
+      border: none;
+      resize: none;
+    }
+
+    input, select {
+      margin: 10px;
+      padding: 8px;
+      font-size: 16px;
     }
 
     button {
-      margin-top: 20px;
-      padding: 12px 20px;
+      padding: 12px 25px;
       font-size: 18px;
       cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      background: #00ccff;
+      color: black;
+      font-weight: bold;
+    }
+
+    #previewContainer {
+      perspective: 400px;
+      height: 300px;
+      overflow: hidden;
+      margin-top: 40px;
+      border-top: 2px solid #333;
+    }
+
+    #crawl {
+      position: relative;
+      transform-origin: 50% 100%;
+      animation: crawl linear infinite;
+      width: 80%;
+      margin: auto;
+      font-weight: bold;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @keyframes crawl {
+      0% {
+        top: 250px;
+        transform: rotateX(25deg) translateZ(0);
+      }
+
+      100% {
+        top: -600px;
+        transform: rotateX(25deg) translateZ(-300px);
+      }
+    }
+
+    #jsonOutput {
+      width: 90%;
+      margin-top: 20px;
+      background: #111;
+      color: #00ff99;
+      padding: 15px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin-left: auto;
+      margin-right: auto;
     }
   </style>
 </head>
+
 <body>
 
-<h1>ESP32 OLED Message</h1>
+<h1>ESP32 OLED Control Panel</h1>
 
-<textarea id="message">Hello from GitHub!</textarea>
-<br>
-<button onclick="saveMessage()">Save Message</button>
+<div class="controls">
+
+  <textarea id="message">Hello from GitHub!</textarea>
+  <br>
+
+  <label>Text Color:</label>
+  <input type="color" id="color" value="#ffffff">
+
+  <br>
+
+  <label>Scroll Speed:</label>
+  <input type="range" id="speed" min="5" max="50" value="20">
+
+  <br>
+
+  <label>Text Size:</label>
+  <input type="range" id="size" min="1" max="4" value="2">
+
+  <br><br>
+
+  <button onclick="saveSettings()">Save Settings</button>
+
+</div>
+
+<div id="previewContainer">
+  <div id="crawl">Hello from GitHub!</div>
+</div>
+
+<h2>ESP32 JSON Data</h2>
+<div id="jsonOutput"></div>
 
 <script>
-async function saveMessage() {
+
+function updatePreview() {
+
   const msg = document.getElementById('message').value;
+  const color = document.getElementById('color').value;
+  const speed = document.getElementById('speed').value;
+  const size = document.getElementById('size').value;
 
-  localStorage.setItem('oledMessage', msg);
+  const crawl = document.getElementById('crawl');
 
-  alert('Message Saved!');
+  crawl.innerText = msg;
+  crawl.style.color = color;
+  crawl.style.fontSize = (size * 12) + "px";
+
+  // Lower number = faster animation
+  crawl.style.animationDuration = (60 - speed) + "s";
+
+  const data = {
+    message: msg,
+    color: color,
+    speed: parseInt(speed),
+    size: parseInt(size)
+  };
+
+  document.getElementById('jsonOutput').innerText =
+    JSON.stringify(data, null, 2);
+
+  localStorage.setItem('oledData', JSON.stringify(data));
 }
+
+function saveSettings() {
+
+  updatePreview();
+
+  alert("Settings Saved!");
+}
+
+document.getElementById('message').addEventListener('input', updatePreview);
+document.getElementById('color').addEventListener('input', updatePreview);
+document.getElementById('speed').addEventListener('input', updatePreview);
+document.getElementById('size').addEventListener('input', updatePreview);
+
+window.onload = () => {
+
+  const saved = localStorage.getItem('oledData');
+
+  if (saved) {
+
+    const data = JSON.parse(saved);
+
+    document.getElementById('message').value = data.message;
+    document.getElementById('color').value = data.color;
+    document.getElementById('speed').value = data.speed;
+    document.getElementById('size').value = data.size;
+  }
+
+  updatePreview();
+};
+
 </script>
 
 </body>
