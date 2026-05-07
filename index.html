@@ -1,37 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ESP32 OLED Controller</title>
-
+  <title>ESP32 OLED Message</title>
   <style>
     body {
-      background: #111;
-      color: white;
       font-family: Arial;
       text-align: center;
-      padding-top: 40px;
+      margin-top: 50px;
+      background: #111;
+      color: white;
     }
 
     textarea {
-      width: 320px;
+      width: 300px;
       height: 120px;
       font-size: 18px;
       padding: 10px;
-      border-radius: 10px;
     }
 
     button {
       margin-top: 20px;
       padding: 12px 20px;
       font-size: 18px;
-      border: none;
-      border-radius: 10px;
       cursor: pointer;
-    }
-
-    #status {
-      margin-top: 20px;
-      color: #00ff88;
     }
   </style>
 </head>
@@ -41,34 +32,17 @@
 
 <textarea id="message">Hello from GitHub!</textarea>
 <br>
-<button onclick="sendMessage()">Update OLED</button>
-
-<div id="status"></div>
+<button onclick="saveMessage()">Save Message</button>
 
 <script>
+async function saveMessage() {
+  const msg = document.getElementById('message').value;
 
-// CHANGE THIS TO YOUR ESP32 IP
-const esp32IP = "http://192.168.1.100";
+  localStorage.setItem('oledMessage', msg);
 
-async function sendMessage() {
+  alert('Message Saved!');
+}
+</script>
 
-  const msg = document.getElementById("message").value;
-
-  try {
-
-    const response = await fetch(`${esp32IP}/message`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain'
-      },
-      body: msg
-    });
-
-    const result = await response.text();
-
-    document.getElementById("status").innerText = result;
-
-  } catch (err) {
-
-    document.getElementById("status").innerText = "Failed to connect to ESP32";
+</body>
 </html>
