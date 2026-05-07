@@ -1,1 +1,6 @@
-
+{
+  "message": "Hello",
+  "size": 2,
+  "speed": 20,
+  "dir": "left"
+}
