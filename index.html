@@ -1,193 +1,123 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ESP32 OLED Control Panel</title>
+  <title>ESP32 OLED Dashboard</title>
 
   <style>
     body {
-      background: black;
+      background: #0d0d0d;
       color: white;
       font-family: Arial;
       text-align: center;
       margin: 0;
-      overflow-x: hidden;
     }
 
     h1 {
       margin-top: 20px;
     }
 
-    .controls {
+    .panel {
       margin-top: 20px;
     }
 
     textarea {
-      width: 350px;
+      width: 360px;
       height: 120px;
-      font-size: 18px;
+      font-size: 16px;
       padding: 10px;
       border-radius: 10px;
       border: none;
-      resize: none;
     }
 
-    input, select {
+    input {
       margin: 10px;
-      padding: 8px;
-      font-size: 16px;
     }
 
     button {
-      padding: 12px 25px;
-      font-size: 18px;
-      cursor: pointer;
+      padding: 12px 20px;
+      font-size: 16px;
       border: none;
       border-radius: 10px;
-      background: #00ccff;
-      color: black;
-      font-weight: bold;
+      background: #00c3ff;
+      cursor: pointer;
     }
 
-    #previewContainer {
-      perspective: 400px;
-      height: 300px;
-      overflow: hidden;
-      margin-top: 40px;
-      border-top: 2px solid #333;
-    }
-
-    #crawl {
-      position: relative;
-      transform-origin: 50% 100%;
-      animation: crawl linear infinite;
-      width: 80%;
-      margin: auto;
-      font-weight: bold;
-      line-height: 1.5;
-      text-align: center;
-    }
-
-    @keyframes crawl {
-      0% {
-        top: 250px;
-        transform: rotateX(25deg) translateZ(0);
-      }
-
-      100% {
-        top: -600px;
-        transform: rotateX(25deg) translateZ(-300px);
-      }
-    }
-
-    #jsonOutput {
-      width: 90%;
-      margin-top: 20px;
-      background: #111;
-      color: #00ff99;
-      padding: 15px;
-      border-radius: 10px;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      margin-left: auto;
-      margin-right: auto;
+    .preview {
+      margin-top: 30px;
+      font-size: 20px;
+      opacity: 0.8;
     }
   </style>
 </head>
 
 <body>
 
-<h1>ESP32 OLED Control Panel</h1>
+<h1>ESP32 OLED Dashboard</h1>
 
-<div class="controls">
+<div class="panel">
 
-  <textarea id="message">Hello from GitHub!</textarea>
+  <textarea id="message">Hello ESP32</textarea>
   <br>
 
-  <label>Text Color:</label>
+  <label>Color</label>
   <input type="color" id="color" value="#ffffff">
 
-  <br>
-
-  <label>Scroll Speed:</label>
+  <label>Speed</label>
   <input type="range" id="speed" min="5" max="50" value="20">
 
-  <br>
-
-  <label>Text Size:</label>
+  <label>Size</label>
   <input type="range" id="size" min="1" max="4" value="2">
 
   <br><br>
 
-  <button onclick="saveSettings()">Save Settings</button>
+  <button onclick="save()">Save to ESP</button>
 
 </div>
 
-<div id="previewContainer">
-  <div id="crawl">Hello from GitHub!</div>
-</div>
-
-<h2>ESP32 JSON Data</h2>
-<div id="jsonOutput"></div>
+<div class="preview" id="preview"></div>
 
 <script>
 
+const API_URL = "https://api.github.com/repos/whiteboywithsomeswag/Hannah/dispatches";
+// (we set this up next)
+
 function updatePreview() {
+  const data = getData();
+  document.getElementById("preview").innerText = JSON.stringify(data, null, 2);
+}
 
-  const msg = document.getElementById('message').value;
-  const color = document.getElementById('color').value;
-  const speed = document.getElementById('speed').value;
-  const size = document.getElementById('size').value;
-
-  const crawl = document.getElementById('crawl');
-
-  crawl.innerText = msg;
-  crawl.style.color = color;
-  crawl.style.fontSize = (size * 12) + "px";
-
-  // Lower number = faster animation
-  crawl.style.animationDuration = (60 - speed) + "s";
-
-  const data = {
-    message: msg,
-    color: color,
-    speed: parseInt(speed),
-    size: parseInt(size)
+function getData() {
+  return {
+    message: document.getElementById("message").value,
+    color: document.getElementById("color").value,
+    speed: Number(document.getElementById("speed").value),
+    size: Number(document.getElementById("size").value)
   };
-
-  document.getElementById('jsonOutput').innerText =
-    JSON.stringify(data, null, 2);
-
-  localStorage.setItem('oledData', JSON.stringify(data));
 }
 
-function saveSettings() {
+async function save() {
 
-  updatePreview();
+  const data = getData();
 
-  alert("Settings Saved!");
+  await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Accept": "application/vnd.github+json",
+      "Authorization": "Bearer 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"
+    },
+    body: JSON.stringify({
+      event_type: "update-oled",
+      client_payload: data
+    })
+  });
+  alert("Saved!");
 }
 
-document.getElementById('message').addEventListener('input', updatePreview);
-document.getElementById('color').addEventListener('input', updatePreview);
-document.getElementById('speed').addEventListener('input', updatePreview);
-document.getElementById('size').addEventListener('input', updatePreview);
+["message","color","speed","size"].forEach(id => {
+  document.getElementById(id).addEventListener("input", updatePreview);
+});
 
-window.onload = () => {
-
-  const saved = localStorage.getItem('oledData');
-
-  if (saved) {
-
-    const data = JSON.parse(saved);
-
-    document.getElementById('message').value = data.message;
-    document.getElementById('color').value = data.color;
-    document.getElementById('speed').value = data.speed;
-    document.getElementById('size').value = data.size;
-  }
-
-  updatePreview();
-};
+updatePreview();
 
 </script>
 
