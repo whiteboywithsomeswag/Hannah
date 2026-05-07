@@ -42,15 +42,14 @@ const BIN_ID = "69fc130e250b1311c3159709";
 const API_KEY = "$2a$10$9E6n6n0ZbtyrLdwRZdLfGuqvo1yOxOrgmSRUdmwHr87h0eZXK5L12";
 
 async function send() {
-  
-  const text = document.getElementById("msg").value;
-  document.getElementById("msg").value = "silly";
 
-  const res = await fetch(`https://api.jsonbin.io/v3/b/69fc130e250b1311c3159709`, {
+  const text = document.getElementById("msg").value;
+
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      "X-Master-Key": "$2a$10$9E6n6n0ZbtyrLdwRZdLfGuqvo1yOxOrgmSRUdmwHr87h0eZXK5L12";
+      "X-Master-Key": API_KEY
     },
     body: JSON.stringify({
       message: text
@@ -63,6 +62,7 @@ async function send() {
     alert("Failed to send");
   }
 }
+
 
 </script>
 
